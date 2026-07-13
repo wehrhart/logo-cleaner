@@ -8,17 +8,22 @@ from bs4 import BeautifulSoup
 
 from . import net, util
 
-# candidate source weights (multiplied into confidence)
-W_JSONLD = 0.95
-W_HEADER_IMG = 0.92
-W_IMG_LOGO = 0.82
-W_INLINE_SVG = 0.85
-W_OG_IMAGE = 0.62
-W_TWITTER = 0.58
-W_APPLE_TOUCH = 0.60
-W_ICON_LINK = 0.50
-W_GSTATIC = 0.50
-W_WIKIDATA_LOGO = 0.88
+# candidate source weights (multiplied into confidence).
+# The deliverable is a small square PROFILE ICON, so sources that are designed
+# for small display (touch/manifest/site icons) outrank page logos; wide
+# wordmark logos survive only as fallbacks via the aspect penalty in imaging.
+W_JSONLD = 0.90
+W_HEADER_IMG = 0.88
+W_IMG_LOGO = 0.80
+W_INLINE_SVG = 0.82
+W_OG_IMAGE = 0.60
+W_TWITTER = 0.56
+W_APPLE_TOUCH = 0.88
+W_ICON_LINK = 0.85
+W_MANIFEST = 0.90
+W_MS_TILE = 0.85
+W_GSTATIC = 0.70
+W_WIKIDATA_LOGO = 0.85
 
 
 def fetch_site(url: str):
@@ -184,7 +189,7 @@ def extract_candidates(html: str, base_url: str):
                     return int(m.group(1)) if m else 0
                 icons.sort(key=_sz, reverse=True)
                 if icons and _sz(icons[0]) >= 180:
-                    add(urljoin(man_url, icons[0].get("src") or ""), "manifest_icon", 0.72,
+                    add(urljoin(man_url, icons[0].get("src") or ""), "manifest_icon", W_MANIFEST,
                         note=icons[0].get("sizes") or "")
             except Exception:
                 pass
@@ -192,7 +197,7 @@ def extract_candidates(html: str, base_url: str):
     # 5) msapplication tile
     tile = soup.find("meta", attrs={"name": "msapplication-TileImage"})
     if tile and tile.get("content"):
-        add(tile["content"], "ms_tile", 0.60)
+        add(tile["content"], "ms_tile", W_MS_TILE)
 
     # 6) icons
     best_touch, best_sz = None, -1

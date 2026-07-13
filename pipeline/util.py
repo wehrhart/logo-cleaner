@@ -129,6 +129,8 @@ BAD_IMAGE_URL_HINTS = (
     "mychart", "my-chart", "epic-", "twitter", "x-logo", "logo-x", "facebook",
     "instagram", "youtube", "linkedin", "tiktok", "social", "app-store",
     "google-play", "apple-store",
+    # platform default icons that are not the hospital's brand
+    "w-logo", "wordpress", "wix-", "squarespace-logo", "godaddy",
 )
 
 
