@@ -15,7 +15,7 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 
-from . import config, hifld, imaging, render, sitelogo, util, wiki
+from . import config, hifld, imaging, render, sitelogo, systems, util, wiki
 
 _log_lock = threading.Lock()
 
@@ -221,6 +221,12 @@ def process_row(row: dict) -> dict:
             lat, lon = hifld_rec.get("LATITUDE"), hifld_rec.get("LONGITUDE")
         try:
             wd = wiki.match_local(row["account"], row["city"], row["state"], lat, lon)
+            # renamed facility: the CURRENT name may be the one Wikidata knows.
+            # Higher bar than the primary lookup: a partial-token match against
+            # the wrong same-city entity is worse than no match.
+            if not wd and len(name_variants) > 1:
+                wd = wiki.match_local(name_variants[1], row["city"], row["state"],
+                                      lat, lon, min_score=0.75)
             if not wd:
                 wd = wiki.lookup_tail(row["account"], row["city"], row["state"])
         except Exception as e:
@@ -255,8 +261,22 @@ def process_row(row: dict) -> dict:
             if alt and alt.upper() != "NOT AVAILABLE" \
                     and util.name_similarity(alt, row["account"]) < 0.85:
                 parent_leads.append((alt, hifld_score * 0.85, "hifld_alt_name"))
-        for pname, link_conf, porigin in parent_leads[:2]:
+            # renamed facilities carry the system name as a prefix of their
+            # CURRENT name: "ASCENSION PROVIDENCE ROCHESTER HOSPITAL" -> Ascension
+            cur = (hifld_rec.get("NAME") or "").strip()
+            if cur and util.name_similarity(cur, row["account"]) < 0.75:
+                toks = cur.split()
+                for k in (3, 2, 1):
+                    if len(toks) > k:
+                        parent_leads.append((" ".join(toks[:k]), hifld_score * 0.95,
+                                             "hifld_current_name_prefix"))
+        for pname, link_conf, porigin in parent_leads[:5]:
             org, sim = wiki.match_org(pname, facility_state=row["state"])
+            if not org or not org.get("website"):
+                cur = systems.lookup(pname)
+                if cur:
+                    org, sim = {"label": cur[0], "website": cur[1]}, 1.0
+                    porigin += "+registry"
             if not org or not org.get("website"):
                 continue
             ctx.attempts.append({"step": "parent_org", "query": pname[:80],

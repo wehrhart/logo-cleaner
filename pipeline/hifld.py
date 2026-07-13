@@ -81,7 +81,7 @@ def match(account: str, address: str, city: str, state: str, zip_code: str):
         # exact street number + zip identifies the facility even after a
         # rename/acquisition changed everything about its name
         if addr_fingerprint and name_s >= 0.2:
-            score = max(score, 0.78)
+            score = max(score, 0.85)
         if score > best_score:
             best, best_score = rec, score
 

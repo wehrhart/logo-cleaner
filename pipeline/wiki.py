@@ -165,9 +165,13 @@ def match_org(name: str, facility_state: str = None):
 
     exact = util.normalize_name(name) == util.normalize_name(best.get("label") or "")
     state_full = util.STATE_NAMES.get((facility_state or "").upper(), "")
-    loc_text = ((best.get("description") or "") + " " + (best.get("admin") or "")).lower()
-    other_state = any(s in loc_text for s in util.STATE_NAMES.values()
-                      if s and s != state_full)
+    desc = (best.get("description") or "").lower()
+    loc_text = (desc + " " + (best.get("admin") or "")).lower()
+    # the different-state veto applies to FACILITIES located elsewhere, not to
+    # national systems whose corporate HQ happens to be in another state
+    facility_like = bool(re.search(r"(hospital|medical cent\w+|clinic) in ", desc))
+    other_state = facility_like and any(s in loc_text for s in util.STATE_NAMES.values()
+                                        if s and s != state_full)
     same_state = bool(state_full and state_full in loc_text)
 
     if other_state and not same_state and not exact:
