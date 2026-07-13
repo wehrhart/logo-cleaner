@@ -131,9 +131,14 @@ BAD_IMAGE_URL_HINTS = (
     "google-play", "apple-store",
     # platform default icons that are not the hospital's brand
     "w-logo", "wordpress", "wix-", "squarespace-logo", "godaddy",
+    # more award/recognition badges seen in the wild
+    "forbes", "pinterest", "top-hospital", "hg-specialty", "surgical-quality",
+    "-sqp-", "gedap", "wellbeing", "anniversary", "50th", "75th", "100th",
+    "article-card", "/news", "best-in-state", "greatest-workplace",
+    "search-svg", "search-icon", "icon-search", "chevron", "hamburger",
 )
 
 
 def looks_like_bad_logo_url(url: str) -> bool:
-    u = (url or "").lower()
+    u = (url or "").lower().replace("_", "-")
     return any(h in u for h in BAD_IMAGE_URL_HINTS)

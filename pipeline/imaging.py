@@ -131,7 +131,10 @@ def quality_factor(m: dict, source: str) -> float:
     size_f = min(1.0, size / 300.0)
     if size < 128:
         size_f *= 0.7
-    photo_pen = 0.15 if (m.get("photo_like") and source in ("og_image", "twitter_image")) else 1.0
+    if m.get("photo_like"):
+        photo_pen = 0.15 if source in ("og_image", "twitter_image") else 0.35
+    else:
+        photo_pen = 1.0
     # The output is a tiny profile icon: compact marks win, wide wordmarks
     # shrink to illegibility inside a square and are fallback-only.
     a = m["aspect"]

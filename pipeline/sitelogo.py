@@ -113,6 +113,9 @@ def extract_candidates(html: str, base_url: str):
         if len(dom_core) >= 3 and not url.startswith("data:") \
                 and dom_core in (url.rsplit("/", 1)[-1] + " " + note).lower().replace("-", ""):
             weight = min(weight + 0.06, 0.97)
+        # "-white" logo variants vanish on light UIs; prefer colored siblings
+        if "white" in url.rsplit("/", 1)[-1].lower():
+            weight -= 0.15
         cands.append({"url": url, "source": source, "weight": weight, "note": note})
 
     # 1) JSON-LD Organization logo
@@ -156,6 +159,10 @@ def extract_candidates(html: str, base_url: str):
             raw = str(svg)
             if len(raw) <= 400:  # trivial icons (hamburger, search)
                 continue
+            head = raw[:300].lower()
+            if any(w in head for w in ("search", "menu", "arrow", "chevron", "close",
+                                       "hamburger", "caret", "play-", "social")):
+                continue
             # decorative icons declare tiny intrinsic sizes; real logos don't
             m = re.search(r'viewbox="[\d.\-]+[ ,]+[\d.\-]+[ ,]+([\d.]+)[ ,]+([\d.]+)"', raw, re.I)
             if m and max(float(m.group(1)), float(m.group(2))) <= 48:
@@ -163,9 +170,21 @@ def extract_candidates(html: str, base_url: str):
             add("data:image/svg+xml;base64," + base64.b64encode(raw.encode()).decode(),
                 "inline_svg", W_INLINE_SVG)
     for img in soup.find_all("img"):
+        # badges live in footers and award/accolade sections, not headers
+        skip = False
+        for anc in img.parents:
+            if anc.name == "footer":
+                skip = True
+                break
+            anc_cls = " ".join(anc.get("class") or []).lower() if hasattr(anc, "get") else ""
+            if any(w in anc_cls for w in ("award", "accolad", "recognition", "badge", "accredit")):
+                skip = True
+                break
+        if skip:
+            continue
         attrs = " ".join([img.get("alt") or "", " ".join(img.get("class") or []),
                           img.get("id") or "", img_url(img)]).lower()
-        if "logo" in attrs:
+        if "logo" in attrs and not util.looks_like_bad_logo_url(attrs):
             add(img_url(img), "img_logo", W_IMG_LOGO, note=img.get("alt") or "")
 
     # 3) social/meta images
