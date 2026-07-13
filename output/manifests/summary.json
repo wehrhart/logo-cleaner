@@ -1,0 +1,73 @@
+{
+  "generated_at": "2026-07-13T19:20:49+00:00",
+  "total_rows": 6116,
+  "completed": 738,
+  "manual_review": 5378,
+  "failed": 0,
+  "pending": 0,
+  "completion_rate": 0.1207,
+  "qa_problems": [],
+  "top_source_domains": [
+    [
+      "hcadam.com",
+      52
+    ],
+    [
+      "hcafloridahealthcare.com",
+      44
+    ],
+    [
+      "commonspirit.org",
+      28
+    ],
+    [
+      "adventhealth.com",
+      27
+    ],
+    [
+      "intermountainhealthcare.org",
+      13
+    ],
+    [
+      "gstatic.com",
+      11
+    ],
+    [
+      "ardenthealthservices.com",
+      10
+    ],
+    [
+      "cloudinary.com",
+      10
+    ],
+    [
+      "christushealth.org",
+      8
+    ],
+    [
+      "fmolhs.org",
+      7
+    ],
+    [
+      "allinahealth.org",
+      7
+    ],
+    [
+      "cdn-website.com",
+      6
+    ],
+    [
+      "brownhealth.org",
+      6
+    ],
+    [
+      "houstonmethodist.org",
+      6
+    ],
+    [
+      "mountainstar.com",
+      6
+    ]
+  ],
+  "filename_template": "File_{id}_0_0_0_0_0_0.png"
+}
