@@ -124,7 +124,7 @@ def _as_result(ent, score):
 
 def match_local(account, city, state, lat=None, lon=None, min_score=0.55):
     """Match a workbook row against the local Wikidata dump."""
-    acct_toks = set(util.distinctive_tokens(account))
+    acct_toks = set(util.brand_tokens(account, city, state))
     best, best_score = None, 0.0
     for ent in _load():
         label = ent.get("label") or ""
@@ -191,7 +191,7 @@ def lookup_tail(account, city, state, min_score=0.55):
     })
     pages = ((data or {}).get("query") or {}).get("pages", {})
     by_qid = {e["qid"]: e for e in _load()}
-    acct_toks = set(util.distinctive_tokens(account))
+    acct_toks = set(util.brand_tokens(account, city, state))
     best, best_score = None, 0.0
     for page in pages.values():
         qid = (page.get("pageprops") or {}).get("wikibase_item")

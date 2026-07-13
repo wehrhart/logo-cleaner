@@ -59,6 +59,19 @@ def distinctive_tokens(name: str) -> list:
     return toks
 
 
+_STATE_WORDS = {w for full in STATE_NAMES.values() for w in full.split()}
+
+
+def brand_tokens(name: str, city: str = "", state: str = "") -> list:
+    """Distinctive tokens minus geography: 'Indiana' in 'The Indiana Heart
+    Hospital' says where it is, not who it is — it must not let a same-state
+    different-org site pass verification."""
+    geo = set(_STATE_WORDS)
+    geo.update(norm_city(city).split())
+    toks = [t for t in distinctive_tokens(name) if t not in geo]
+    return toks or distinctive_tokens(name)
+
+
 def name_similarity(a: str, b: str) -> float:
     """Blend of sequence similarity and token-set overlap, 0..1."""
     na, nb = normalize_name(a), normalize_name(b)
@@ -136,6 +149,7 @@ BAD_IMAGE_URL_HINTS = (
     "-sqp-", "gedap", "wellbeing", "anniversary", "50th", "75th", "100th",
     "article-card", "/news", "best-in-state", "greatest-workplace",
     "search-svg", "search-icon", "icon-search", "chevron", "hamburger",
+    "bptw", "best-places", "best-place",
 )
 
 

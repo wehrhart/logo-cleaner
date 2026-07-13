@@ -62,10 +62,17 @@ def verify_site(html: str, final_url: str, account, city: str, state: str, zip_c
     dom_core = dom.split(".")[0].replace("-", "")
     cov, dom_hit = 0.0, 0.0
     for name in variants:
-        dts = util.distinctive_tokens(name) or util.name_tokens(name)
+        dts = util.brand_tokens(name, city, state) or util.name_tokens(name)
         if not dts:
             continue
-        cov = max(cov, sum(1 for t in dts if t in text or t in title) / len(dts))
+        if len(dts) == 1:
+            # one brand token is thin evidence: require it in the title or
+            # repeatedly in the copy, not a single stray prose hit
+            t = dts[0]
+            hit = 1.0 if (t in title or text.count(t) >= 3) else 0.0
+            cov = max(cov, hit)
+        else:
+            cov = max(cov, sum(1 for t in dts if t in text or t in title) / len(dts))
         if any(t in dom_core for t in dts if len(t) >= 4):
             dom_hit = 1.0
         # initialism domains: snhhealth.org for Southern New Hampshire ...
