@@ -14,14 +14,9 @@ _available = None
 
 
 def available() -> bool:
-    """Disabled unless explicitly enabled: in this session's environment the
-    egress proxy resets Chromium's CONNECT sockets, so renders only ever
-    return Chromium's error page. Full browser headers on plain requests
-    handle WAF-blocked sites instead (TLS is re-originated by the proxy)."""
     global _available
     if _available is None:
-        _available = (os.environ.get("ENABLE_RENDER") == "1"
-                      and bool(shutil.which(CHROMIUM) or os.path.exists(CHROMIUM)))
+        _available = bool(shutil.which(CHROMIUM) or os.path.exists(CHROMIUM))
     return _available
 
 
@@ -34,6 +29,10 @@ def render(url: str, timeout_s: float = 35.0):
         CHROMIUM, "--headless", "--no-sandbox", "--disable-gpu",
         "--disable-dev-shm-usage", "--mute-audio", "--hide-scrollbars",
         "--blink-settings=imagesEnabled=false",
+        # the egress proxy's TLS interception cannot complete Chromium's
+        # TLS 1.3 handshake; cap at 1.2 (certificate verification stays on)
+        "--ssl-version-max=tls1.2",
+        "--disable-features=EncryptedClientHello",
         "--virtual-time-budget=6000", "--timeout=20000",
         "--window-size=1366,900", "--dump-dom", url,
     ]
@@ -41,10 +40,20 @@ def render(url: str, timeout_s: float = 35.0):
         cmd.insert(-2, f"--proxy-server={proxy}")
     with _sem:
         try:
-            out = subprocess.run(cmd, capture_output=True, timeout=timeout_s)
-        except (subprocess.TimeoutExpired, OSError):
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                    start_new_session=True)
+            stdout, _ = proc.communicate(timeout=timeout_s)
+        except subprocess.TimeoutExpired:
+            import signal
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            except (ProcessLookupError, OSError):
+                pass
+            proc.wait()
             return None
-    html = out.stdout.decode("utf-8", errors="replace")
+        except OSError:
+            return None
+    html = stdout.decode("utf-8", errors="replace")
     if len(html) < 500 or "<body" not in html.lower():
         return None
     if "Copyright 2017 The Chromium Authors" in html:  # Chromium error page

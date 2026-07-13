@@ -150,6 +150,9 @@ BAD_IMAGE_URL_HINTS = (
     "article-card", "/news", "best-in-state", "greatest-workplace",
     "search-svg", "search-icon", "icon-search", "chevron", "hamburger",
     "bptw", "best-places", "best-place",
+    # widget branding that appears in rendered DOMs (Google Translate etc.)
+    "googlelogo", "productlogos", "gstatic.com/images/branding",
+    "recaptcha", "google-maps", "maps.googleapis",
 )
 
 
