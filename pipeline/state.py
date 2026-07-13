@@ -123,6 +123,16 @@ class State:
         with self._lock:
             return [dict(r) for r in self._conn.execute("SELECT * FROM rows ORDER BY id").fetchall()]
 
+    def ban_urls(self, row_id, urls):
+        """Remember candidate URLs rejected by visual QA so reprocessing can
+        never re-accept them for this row."""
+        cur = set(self.get_meta(f"banned:{row_id}", []))
+        cur.update(u[:300] for u in urls if u)
+        self.set_meta(f"banned:{row_id}", sorted(cur))
+
+    def banned_urls(self, row_id):
+        return set(self.get_meta(f"banned:{row_id}", []))
+
     def set_meta(self, key, value):
         with self._lock:
             self._conn.execute(

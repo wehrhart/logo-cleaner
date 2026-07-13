@@ -156,8 +156,9 @@ def _try_site(ctx: RowContext, url: str, disc_conf: float, origin: str,
 def _evaluate(ctx: RowContext, cands, identity_conf: float):
     """Download/score candidates; keep the best. Stops early on a great hit."""
     seen = {e["url"] for e in ctx.evaluated}
+    banned = ctx.row.get("_banned") or set()
     for cand in cands[:8]:
-        if cand["url"][:300] in seen:
+        if cand["url"][:300] in seen or cand["url"][:300] in banned:
             continue
         entry = {"url": cand["url"][:300], "source": cand["source"],
                  "weight": cand["weight"], "identity_conf": identity_conf}
@@ -370,6 +371,7 @@ def run(state, limit=None, include_failed=False, workers=None, progress_every=25
 
     def work(rid):
         row = state.get_row(rid)
+        row["_banned"] = state.banned_urls(rid)
         try:
             return rid, process_row(row), None
         except Exception:
