@@ -45,10 +45,8 @@ for _d in (LOGOS_DIR, REVIEW_DIR, MANIFESTS_DIR, CACHE_DIR, HTTP_CACHE_DIR, LOGS
 WORKBOOK_PATH = Path(_env("WORKBOOK_PATH", REPO_ROOT / "data" / "Account_Icon_Search_Batch_3.xlsx"))
 
 # --- output naming --------------------------------------------------------
-# NOTE: the task template said File_{ID}_0_0_0_0_0_0.png (six zeros) but all
-# three worked examples show five zeros (File_8_0_0_0_0_0.png). We follow the
-# examples; override FILENAME_TEMPLATE if six zeros are actually required.
-FILENAME_TEMPLATE = _env("FILENAME_TEMPLATE", "File_{id}_0_0_0_0_0.png")
+# Six zeros after the ID, per the client's confirmed requirement.
+FILENAME_TEMPLATE = _env("FILENAME_TEMPLATE", "File_{id}_0_0_0_0_0_0.png")
 
 # --- image rules ----------------------------------------------------------
 MIN_OUTPUT_SIZE = int(_env("MIN_OUTPUT_SIZE", "250"))
