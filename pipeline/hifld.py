@@ -66,7 +66,10 @@ def match(account: str, address: str, city: str, state: str, zip_code: str):
         alt = rec.get("ALT_NAME") or ""
         if alt and alt != "NOT AVAILABLE":
             name_s = max(name_s, util.name_similarity(account, alt))
-        if name_s < 0.30:
+        addr_fingerprint = bool(
+            z5 and rec["_zip5"] == z5
+            and snum and util.street_number(rec.get("ADDRESS") or "") == snum)
+        if name_s < 0.30 and not addr_fingerprint:
             continue
         score = 0.52 * name_s
         if z5 and rec["_zip5"] == z5:
@@ -75,6 +78,10 @@ def match(account: str, address: str, city: str, state: str, zip_code: str):
             score += 0.14
         if snum and util.street_number(rec.get("ADDRESS") or "") == snum:
             score += 0.12
+        # exact street number + zip identifies the facility even after a
+        # rename/acquisition changed everything about its name
+        if addr_fingerprint and name_s >= 0.2:
+            score = max(score, 0.78)
         if score > best_score:
             best, best_score = rec, score
 

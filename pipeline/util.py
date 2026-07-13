@@ -127,8 +127,8 @@ BAD_IMAGE_URL_HINTS = (
     "fundrais", "gala", "event-", "safety-grade",
     # third-party product/social logos that appear on hospital sites
     "mychart", "my-chart", "epic-", "twitter", "x-logo", "logo-x", "facebook",
-    "instagram", "youtube", "linkedin", "tiktok", "social", "app-store",
-    "google-play", "apple-store",
+    "instagram", "youtube", "linkedin", "tiktok", "social-icon", "social-media",
+    "/social/", "app-store", "google-play", "apple-store",
     # platform default icons that are not the hospital's brand
     "w-logo", "wordpress", "wix-", "squarespace-logo", "godaddy",
     # more award/recognition badges seen in the wild

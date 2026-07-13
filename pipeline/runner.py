@@ -101,6 +101,20 @@ def _try_site(ctx: RowContext, url: str, disc_conf: float, origin: str,
         site_conf, detail, signals = sitelogo.verify_site(
             html, final_url, account, row["city"], row["state"], row["zip"])
         identity = _identity_conf(disc_conf, site_conf, signals)
+        # redirect vouching: the domain an authoritative directory listed for
+        # this facility redirected here — the rebranded site inherits identity
+        # (e.g. snhmc.org -> snhhealth.org after a rename), provided the
+        # destination still reads as a healthcare organization.
+        final_dom = util.registrable_domain(final_url)
+        if (final_dom != util.registrable_domain(u)
+                and final_dom not in util.AGGREGATOR_DOMAINS
+                and not signals.get("parked_page")
+                and identity_cap is None):
+            vouched = round(max(identity, 0.80 * disc_conf), 3)
+            if vouched > identity:
+                ctx.attempts.append({"step": "redirect_vouch", "from": u[:120],
+                                     "to": final_url[:120], "identity": vouched})
+                identity = vouched
         if identity_cap is not None:
             # parent-system leads: verifying the parent's site against the
             # parent's own name is circular, so identity comes from the
@@ -182,11 +196,19 @@ def process_row(row: dict) -> dict:
     facility_closed = bool(hifld_rec and hifld_score >= 0.62
                            and (hifld_rec.get("STATUS") or "").upper() == "CLOSED")
 
+    # name variants: renamed facilities verify against their CURRENT name
+    name_variants = [row["account"]]
+    if hifld_rec and hifld_score >= config.HIFLD_MATCH_THRESHOLD:
+        for k in ("NAME", "ALT_NAME"):
+            v = (hifld_rec.get(k) or "").strip()
+            if v and v.upper() != "NOT AVAILABLE" and v not in name_variants:
+                name_variants.append(v)
+
     # ---- 2. HIFLD website first (cheap, authoritative) ----------------------
     if hifld_rec and hifld_score >= config.HIFLD_MATCH_THRESHOLD and not facility_closed:
         w = hifld.website_of(hifld_rec)
         if w:
-            _try_site(ctx, w, hifld_score, "hifld")
+            _try_site(ctx, w, hifld_score, "hifld", account=name_variants)
 
     strong_hit = ctx.best and ctx.best[0] >= config.ACCEPT_THRESHOLD \
         and ctx.best[1]["weight"] >= STRONG_SOURCE_WEIGHT
@@ -207,8 +229,11 @@ def process_row(row: dict) -> dict:
             ctx.attempts.append({"step": "wikidata", "qid": wd["qid"], "label": wd["label"],
                                  "score": wd["score"], "website": wd.get("website", ""),
                                  "logo": wd.get("logo_file", ""), "parent": wd.get("parent_system", "")})
+            if wd.get("label") and wd["label"] not in name_variants:
+                name_variants.append(wd["label"])
             if wd.get("website") and not facility_closed:
-                _try_site(ctx, wd["website"], wd["score"], "wikidata")
+                _try_site(ctx, wd["website"], wd["score"], "wikidata",
+                          account=name_variants)
             if wd.get("logo_url"):
                 _evaluate(ctx, [{"url": wd["logo_url"], "source": "wikidata_logo",
                                  "weight": sitelogo.W_WIKIDATA_LOGO}], wd["score"])

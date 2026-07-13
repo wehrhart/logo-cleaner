@@ -44,16 +44,35 @@ def fetch_site(url: str):
     return None, None, "; ".join(tried)
 
 
-def verify_site(html: str, final_url: str, account: str, city: str, state: str, zip_code: str):
-    """Score 0..1 that this site belongs to the workbook facility (or its system)."""
+def verify_site(html: str, final_url: str, account, city: str, state: str, zip_code: str):
+    """Score 0..1 that this site belongs to the workbook facility (or its system).
+
+    `account` may be a string or a list of name variants (workbook name plus
+    HIFLD current/alt names, Wikidata label): renamed facilities verify against
+    what the site calls itself today, not only the legacy workbook name.
+    """
+    variants = [account] if isinstance(account, str) else [a for a in account if a]
     soup = BeautifulSoup(html, "lxml")
     for tag in soup(["script", "style", "noscript"]):
         tag.decompose()
     text = " " + re.sub(r"\s+", " ", soup.get_text(" ").lower()) + " "
     title = (soup.title.text if soup.title else "").lower()
 
-    dts = util.distinctive_tokens(account) or util.name_tokens(account)
-    cov = sum(1 for t in dts if t in text or t in title) / len(dts) if dts else 0.0
+    dom = util.registrable_domain(final_url)
+    dom_core = dom.split(".")[0].replace("-", "")
+    cov, dom_hit = 0.0, 0.0
+    for name in variants:
+        dts = util.distinctive_tokens(name) or util.name_tokens(name)
+        if not dts:
+            continue
+        cov = max(cov, sum(1 for t in dts if t in text or t in title) / len(dts))
+        if any(t in dom_core for t in dts if len(t) >= 4):
+            dom_hit = 1.0
+        # initialism domains: snhhealth.org for Southern New Hampshire ...
+        initials = "".join(t[0] for t in util.name_tokens(name))
+        if len(initials) >= 3 and (dom_core.startswith(initials[:3]) or initials in dom_core):
+            dom_hit = 1.0
+    account = variants[0] if variants else ""
     ncity = util.norm_city(city)
     city_hit = 1.0 if ncity and ncity in text else 0.0
     z5 = util.zip5(zip_code)
@@ -61,8 +80,6 @@ def verify_site(html: str, final_url: str, account: str, city: str, state: str, 
     st = (state or "").upper()
     state_full = util.STATE_NAMES.get(st, "")
     state_hit = 1.0 if (state_full and state_full in text) or re.search(rf"[ ,]{st.lower()}[ ,.]", text) else 0.0
-    dom = util.registrable_domain(final_url)
-    dom_hit = 1.0 if any(t in dom.replace("-", "") for t in dts if len(t) >= 4) else 0.0
 
     score = 0.45 * cov + 0.20 * city_hit + 0.10 * zip_hit + 0.10 * state_hit + 0.15 * dom_hit
     # wrong-industry veto: a human-healthcare account must not match a
@@ -74,7 +91,12 @@ def verify_site(html: str, final_url: str, account: str, city: str, state: str, 
     detail = f"name_cov={cov:.2f} city={city_hit:.0f} zip={zip_hit:.0f} state={state_hit:.0f} domain={dom_hit:.0f} ({dom})"
     signals = {"name_cov": cov, "city": bool(city_hit), "zip": bool(zip_hit),
                "state": bool(state_hit), "domain": bool(dom_hit),
-               "thin_page": len(text) < 1500}
+               "thin_page": len(text) < 1500,
+               "healthcare_page": bool(re.search(
+                   r"health|hospital|medical|clinic|patient|physician|care", text + title)),
+               "parked_page": bool(re.search(
+                   r"domain (is )?for sale|buy this domain|parked|coming soon|"
+                   r"under construction|godaddy|namecheap|hugedomains", text + title))}
     return round(min(score, 1.0), 3), detail, signals
 
 
