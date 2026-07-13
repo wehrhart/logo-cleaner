@@ -1,0 +1,5 @@
+# pipeline outputs (manifests/summary committed explicitly at delivery time)
+output/
+.env
+__pycache__/
+*.pyc
