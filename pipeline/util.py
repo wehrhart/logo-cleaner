@@ -153,6 +153,8 @@ BAD_IMAGE_URL_HINTS = (
     # widget branding that appears in rendered DOMs (Google Translate etc.)
     "googlelogo", "productlogos", "gstatic.com/images/branding",
     "recaptcha", "google-maps", "maps.googleapis",
+    "cookielaw", "onetrust", "cookie-", "consent",
+    "hospital-association", "hospitalassociation",
 )
 
 
