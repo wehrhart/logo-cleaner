@@ -9,7 +9,8 @@ import subprocess
 import threading
 
 CHROMIUM = os.environ.get("CHROMIUM_PATH", "/opt/pw-browsers/chromium")
-_sem = threading.BoundedSemaphore(3)
+import os as _os
+_sem = threading.BoundedSemaphore(int(_os.environ.get("RENDER_CONCURRENCY", "14")))
 _available = None
 
 
@@ -20,7 +21,7 @@ def available() -> bool:
     return _available
 
 
-def render(url: str, timeout_s: float = 35.0):
+def render(url: str, timeout_s: float = 22.0):
     """Render a page and return its post-JS DOM HTML, or None."""
     if not available():
         return None
@@ -33,7 +34,7 @@ def render(url: str, timeout_s: float = 35.0):
         # TLS 1.3 handshake; cap at 1.2 (certificate verification stays on)
         "--ssl-version-max=tls1.2",
         "--disable-features=EncryptedClientHello",
-        "--virtual-time-budget=6000", "--timeout=20000",
+        "--virtual-time-budget=3500", "--timeout=12000",
         "--window-size=1366,900", "--dump-dom", url,
     ]
     if proxy:
