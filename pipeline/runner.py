@@ -172,7 +172,7 @@ def _evaluate(ctx: RowContext, cands, identity_conf: float):
             ctx.evaluated.append(entry)
             continue
         img = imaging.trim(img)
-        m = imaging.analyze(img)
+        m = imaging.analyze(img, kind)
         qf = imaging.quality_factor(m, cand["source"])
         conf = round(cand["weight"] * identity_conf * (0.55 + 0.45 * qf), 3) if qf > 0 else 0.0
         entry.update({"kind": kind, "metrics": m, "quality": qf, "conf": conf})

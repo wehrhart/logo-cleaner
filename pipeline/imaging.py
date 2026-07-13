@@ -84,7 +84,7 @@ def trim(img: Image.Image) -> Image.Image:
     return img
 
 
-def analyze(img: Image.Image):
+def analyze(img: Image.Image, kind: str = ""):
     """Quality metrics for a trimmed candidate image."""
     w, h = img.size
     if w == 0 or h == 0:
@@ -119,7 +119,12 @@ def analyze(img: Image.Image):
         m["reject"] = f"extreme_aspect_{aspect:.1f}"
     elif max(w, h) < config.MIN_SOURCE_DIM:
         m["reject"] = f"too_small_{w}x{h}"
-    m["photo_like"] = bool(n_colors >= 5000 and min(w, h) >= 500 and visible > 0.95 and std > 40)
+    m["photo_like"] = bool(
+        (n_colors >= 5000 and min(w, h) >= 500 and visible > 0.95 and std > 40)
+        # small photos (e.g. a favicon that is a snapshot of the building):
+        # a JPEG whose 128px thumbnail still has thousands of colors and no
+        # transparency is a photograph, whatever its pixel size
+        or (kind in ("jpeg", "jpg", "webp") and n_colors >= 4000 and visible > 0.97))
     return m
 
 
