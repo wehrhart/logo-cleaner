@@ -99,7 +99,8 @@ def extract_candidates(html: str, base_url: str):
             url = "https:" + url
         elif not url.startswith(("http", "data:")):
             url = urljoin(base_url, url)
-        if url in seen or util.looks_like_bad_logo_url(url):
+        if url in seen or util.looks_like_bad_logo_url(url) \
+                or (note and util.looks_like_bad_logo_url(note)):
             return
         seen.add(url)
         # brand-asset URLs usually carry the org's domain core (e.g. lluh in

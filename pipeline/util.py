@@ -125,6 +125,10 @@ BAD_IMAGE_URL_HINTS = (
     "chamber", "seal-", "certif", "top100", "top-100", "blue-distinction",
     "aha-", "grade-a", "newsweek", "licensure", "campaign", "donate",
     "fundrais", "gala", "event-", "safety-grade",
+    # third-party product/social logos that appear on hospital sites
+    "mychart", "my-chart", "epic-", "twitter", "x-logo", "logo-x", "facebook",
+    "instagram", "youtube", "linkedin", "tiktok", "social", "app-store",
+    "google-play", "apple-store",
 )
 
 
