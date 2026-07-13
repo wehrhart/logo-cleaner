@@ -124,10 +124,15 @@ def _as_result(ent, score):
 
 def match_local(account, city, state, lat=None, lon=None, min_score=0.55):
     """Match a workbook row against the local Wikidata dump."""
+    acct_toks = set(util.distinctive_tokens(account))
     best, best_score = None, 0.0
     for ent in _load():
-        name_s = util.name_similarity(account, ent.get("label") or "")
+        label = ent.get("label") or ""
+        name_s = util.name_similarity(account, label)
         if name_s < 0.45:
+            continue
+        # location can support a name match, never substitute for one
+        if name_s < 0.75 and acct_toks and not (acct_toks & set(util.distinctive_tokens(label))):
             continue
         score = 0.55 * name_s + 0.45 * _loc_score(ent, city, state, lat, lon)
         if score > best_score:
@@ -182,12 +187,16 @@ def lookup_tail(account, city, state, min_score=0.55):
     })
     pages = ((data or {}).get("query") or {}).get("pages", {})
     by_qid = {e["qid"]: e for e in _load()}
+    acct_toks = set(util.distinctive_tokens(account))
     best, best_score = None, 0.0
     for page in pages.values():
         qid = (page.get("pageprops") or {}).get("wikibase_item")
         title = page.get("title") or ""
         desc = page.get("description") or ""
         if not _HOSPITAL_WORDS.search(title + " " + desc):
+            continue
+        if acct_toks and not (acct_toks & set(util.distinctive_tokens(title))) \
+                and util.name_similarity(account, title) < 0.75:
             continue
         ent = by_qid.get(qid)
         if ent is None:

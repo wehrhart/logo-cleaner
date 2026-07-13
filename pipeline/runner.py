@@ -31,13 +31,18 @@ def _log_event(event: dict):
 
 def _identity_conf(disc_conf: float, site_conf: float, signals: dict) -> float:
     base = 0.08 + 0.40 * disc_conf + 0.60 * site_conf
-    # page confirms the exact location -> strong chain of evidence
-    if signals.get("city") and (signals.get("zip") or signals.get("state")):
+    # page confirms the exact location AND carries the facility's name.
+    # Location alone is NOT identity: a same-town different-org site (e.g. a
+    # veterinary clinic in the same city+zip) matches city/zip/state perfectly.
+    if signals.get("city") and (signals.get("zip") or signals.get("state")) \
+            and signals.get("name_cov", 0) > 0.15:
         base += 0.15
     # authoritative directory pointed here AND the domain carries the name:
     # trust that even when the page text is thin (JS-rendered sites)
     if signals.get("domain"):
         base = max(base, 0.72 * disc_conf + 0.28 * site_conf)
+    elif signals.get("name_cov", 0) == 0:
+        base = min(base, 0.55)  # no name evidence anywhere -> never auto-accept
     return min(1.0, round(base, 3))
 
 

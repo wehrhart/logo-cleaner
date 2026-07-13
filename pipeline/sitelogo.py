@@ -65,6 +65,12 @@ def verify_site(html: str, final_url: str, account: str, city: str, state: str, 
     dom_hit = 1.0 if any(t in dom.replace("-", "") for t in dts if len(t) >= 4) else 0.0
 
     score = 0.45 * cov + 0.20 * city_hit + 0.10 * zip_hit + 0.10 * state_hit + 0.15 * dom_hit
+    # wrong-industry veto: a human-healthcare account must not match a
+    # veterinary/animal site no matter how well the location lines up
+    if re.search(r"veterinar|animal hospital|animal clinic|pet clinic|pet care", text) \
+            and not re.search(r"veterinar|animal|pet", (account or "").lower()):
+        score = 0.0
+        cov = 0.0
     detail = f"name_cov={cov:.2f} city={city_hit:.0f} zip={zip_hit:.0f} state={state_hit:.0f} domain={dom_hit:.0f} ({dom})"
     signals = {"name_cov": cov, "city": bool(city_hit), "zip": bool(zip_hit),
                "state": bool(state_hit), "domain": bool(dom_hit),
