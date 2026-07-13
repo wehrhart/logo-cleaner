@@ -252,6 +252,13 @@ def extract_candidates(html: str, base_url: str):
             f"&fallback_opts=TYPE,SIZE,URL&url=https://{quote(dom)}&size=256",
             "gstatic_favicon", W_GSTATIC)
 
+    # multi-org directory pages (e.g. a university system listing every campus
+    # logo): when a page carries many distinct "logo" images, none of them can
+    # be trusted to be THIS facility's brand — keep only header/JSON-LD/icons.
+    n_img_logos = sum(1 for c in cands if c["source"] == "img_logo")
+    if n_img_logos > 6:
+        cands = [c for c in cands if c["source"] != "img_logo"]
+
     og_site = soup.find("meta", attrs={"property": "og:site_name"})
     site_meta = {
         "org_name": org_name,
