@@ -12,7 +12,9 @@ CHROMIUM = os.environ.get("CHROMIUM_PATH", "/opt/pw-browsers/chromium")
 import os as _os
 # 4-core box: each headless Chromium is CPU-heavy during JS render, so cap
 # concurrent renders low (14 caused CPU starvation + a process pileup).
-_sem = threading.BoundedSemaphore(int(_os.environ.get("RENDER_CONCURRENCY", "5")))
+# Hard-clamp to <=6 regardless of env so a stale override can't re-trigger it.
+_RENDER_CONC = max(1, min(6, int(_os.environ.get("RENDER_CONCURRENCY", "5"))))
+_sem = threading.BoundedSemaphore(_RENDER_CONC)
 _available = None
 
 
