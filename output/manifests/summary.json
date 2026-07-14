@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-07-13T19:20:49+00:00",
+  "generated_at": "2026-07-14T01:37:46+00:00",
   "total_rows": 6116,
-  "completed": 738,
-  "manual_review": 5378,
+  "completed": 998,
+  "manual_review": 5118,
   "failed": 0,
   "pending": 0,
-  "completion_rate": 0.1207,
+  "completion_rate": 0.1632,
   "qa_problems": [],
   "top_source_domains": [
     [
@@ -29,44 +29,44 @@
       13
     ],
     [
+      "mktgcdn.com",
+      13
+    ],
+    [
+      "upmc.com",
+      12
+    ],
+    [
+      "ardenthealthservices.com",
+      11
+    ],
+    [
       "gstatic.com",
       11
     ],
     [
-      "ardenthealthservices.com",
-      10
+      "shrinerschildrens.org",
+      11
     ],
     [
       "cloudinary.com",
       10
     ],
     [
+      "covenanthealth.com",
+      9
+    ],
+    [
       "christushealth.org",
+      8
+    ],
+    [
+      "phs.org",
       8
     ],
     [
       "fmolhs.org",
       7
-    ],
-    [
-      "allinahealth.org",
-      7
-    ],
-    [
-      "cdn-website.com",
-      6
-    ],
-    [
-      "brownhealth.org",
-      6
-    ],
-    [
-      "houstonmethodist.org",
-      6
-    ],
-    [
-      "mountainstar.com",
-      6
     ]
   ],
   "filename_template": "File_{id}_0_0_0_0_0_0.png"

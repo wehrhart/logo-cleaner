@@ -1,15 +1,15 @@
 # Hospital Logo Pipeline — Summary Report
-Generated: 2026-07-13T19:20:49+00:00
+Generated: 2026-07-14T01:37:46+00:00
 
 | Metric | Count |
 |---|---|
 | Total rows | 6116 |
-| Completed | 738 |
-| Manual review | 5378 |
+| Completed | 998 |
+| Manual review | 5118 |
 | Failed | 0 |
 | Pending | 0 |
 
-Completion rate: **12.1%**
+Completion rate: **16.3%**
 
 ## Top source domains
 - hcadam.com: 52
@@ -17,15 +17,15 @@ Completion rate: **12.1%**
 - commonspirit.org: 28
 - adventhealth.com: 27
 - intermountainhealthcare.org: 13
+- mktgcdn.com: 13
+- upmc.com: 12
+- ardenthealthservices.com: 11
 - gstatic.com: 11
-- ardenthealthservices.com: 10
+- shrinerschildrens.org: 11
 - cloudinary.com: 10
+- covenanthealth.com: 9
 - christushealth.org: 8
+- phs.org: 8
 - fmolhs.org: 7
-- allinahealth.org: 7
-- cdn-website.com: 6
-- brownhealth.org: 6
-- houstonmethodist.org: 6
-- mountainstar.com: 6
 
 ## QA problems (0)
