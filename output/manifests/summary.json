@@ -1,39 +1,55 @@
 {
-  "generated_at": "2026-07-14T01:37:46+00:00",
+  "generated_at": "2026-07-21T13:55:01+00:00",
   "total_rows": 6116,
-  "completed": 998,
-  "manual_review": 5118,
+  "completed": 2016,
+  "manual_review": 4100,
   "failed": 0,
   "pending": 0,
-  "completion_rate": 0.1632,
+  "completion_rate": 0.3296,
   "qa_problems": [],
   "top_source_domains": [
     [
       "hcadam.com",
-      52
+      59
     ],
     [
       "hcafloridahealthcare.com",
       44
     ],
     [
+      "adventhealth.com",
+      31
+    ],
+    [
       "commonspirit.org",
       28
     ],
     [
-      "adventhealth.com",
+      "upmc.com",
       27
     ],
     [
+      "baylorfrisco.com",
+      26
+    ],
+    [
+      "christushealth.org",
+      24
+    ],
+    [
       "intermountainhealthcare.org",
-      13
+      17
     ],
     [
       "mktgcdn.com",
       13
     ],
     [
-      "upmc.com",
+      "shrinerschildrens.org",
+      13
+    ],
+    [
+      "gstatic.com",
       12
     ],
     [
@@ -41,32 +57,16 @@
       11
     ],
     [
-      "gstatic.com",
-      11
-    ],
-    [
-      "shrinerschildrens.org",
-      11
-    ],
-    [
       "cloudinary.com",
-      10
+      11
     ],
     [
-      "covenanthealth.com",
+      "prismahealth.org",
+      11
+    ],
+    [
+      "houstonmethodist.org",
       9
-    ],
-    [
-      "christushealth.org",
-      8
-    ],
-    [
-      "phs.org",
-      8
-    ],
-    [
-      "fmolhs.org",
-      7
     ]
   ],
   "filename_template": "File_{id}_0_0_0_0_0_0.png"
